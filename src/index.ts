@@ -203,7 +203,10 @@ fastify.post('/doc-chat', async function (req, reply) {
     });
 });
 
-fastify.listen({ port: 8000 }, (err, address) => {
+const PORT = Number(process.env.PORT) || 8000;
+
+fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
     if (err) throw err;
     fastify.log.info(`🚀 Server running at ${address}`);
 });
+
