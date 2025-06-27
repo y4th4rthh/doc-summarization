@@ -17,7 +17,7 @@ dotenv.config();
 const fastify = Fastify({ logger: true });
 
 await fastify.register(cors, {
-    origin: ['http://localhost:3000'], // ✅ Frontend URL
+    origin: ['http://localhost:3000','https://neura-ai.netlify.app'], // ✅ Frontend URL
     methods: ['GET', 'POST'],
     credentials: true,
 });
