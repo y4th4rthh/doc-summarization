@@ -37,7 +37,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 const runGeminiChat = async (sysPrompt: string, prompt: string) => {
     const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash-8b",
+        model: "gemini-2.5-flash",
         systemInstruction: sysPrompt,
         generationConfig: {
             temperature: 0.9,
@@ -209,3 +209,4 @@ fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
     if (err) throw err;
     fastify.log.info(`🚀 Server running at ${address}`);
 });
+
