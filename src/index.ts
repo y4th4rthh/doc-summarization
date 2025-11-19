@@ -17,7 +17,7 @@ dotenv.config();
 const fastify = Fastify({ logger: true });
 
 await fastify.register(cors, {
-    origin: ['http://localhost:3000','https://neura-ai.netlify.app','https://neura-explore-ai.netlify.app/'], // ✅ Frontend URL
+    origin: ['http://localhost:3000','https://neura-ai.netlify.app','https://neura-explore-ai.netlify.app/','https://neura-explore-ai.netlify.app'], // ✅ Frontend URL
     methods: ['GET', 'POST'],
     credentials: true,
 });
@@ -209,5 +209,6 @@ fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
     if (err) throw err;
     fastify.log.info(`🚀 Server running at ${address}`);
 });
+
 
 
