@@ -271,7 +271,7 @@ const runGeminiChat = async (sysPrompt: string, prompt: string) => {
 const runGeminiImg = async (sysPrompt: string, prompt: string, fileObj?: any) => {
 
     const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.5-pro",
         systemInstruction: sysPrompt,
         generationConfig: {
             temperature: 0.9,
@@ -524,7 +524,7 @@ fastify.post('/img-chat', async function (req, reply) {
 
             // 🟢 CALL GEMINI HERE
             const geminiResponse = await runGeminiImg(
-                "You are an image analysis assistant.", // sysPrompt
+                "You are an image interpreter.  Respond quickly. Ignore shadows, noise, wrinkles, compression artifacts, patterns or scribbles.  Focus only on clear objects, people, clothing, colors, lighting, and the main subject.  Do NOT invent symbols, numbers, or text unless they are clearly legible. ", // sysPrompt
                 text,        // user text prompt
                 fileData     // base64 image object
             );
@@ -634,6 +634,7 @@ fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
     if (err) throw err;
     fastify.log.info(`🚀 Server running at ${address}`);
 });
+
 
 
 
