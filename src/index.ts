@@ -627,6 +627,10 @@ fastify.post('/img-chat', async function (req, reply) {
     });
 });
 
+fastify.get('/ping', async (request, reply) => {
+  return { status: 'ok' }
+})
+
 
 const PORT = Number(process.env.PORT) || 8000;
 
@@ -634,6 +638,7 @@ fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
     if (err) throw err;
     fastify.log.info(`🚀 Server running at ${address}`);
 });
+
 
 
 
