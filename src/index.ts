@@ -269,9 +269,9 @@ const runGeminiChat = async (sysPrompt: string, prompt: string) => {
 };
 
 const runGeminiImg = async (sysPrompt: string, prompt: string, fileObj?: any) => {
-
+     //gemini-2.5-pro
     const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-pro",
+        model: "gemini-2.5-flash",
         systemInstruction: sysPrompt,
         generationConfig: {
             temperature: 0.9,
@@ -638,6 +638,7 @@ fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
     if (err) throw err;
     fastify.log.info(`🚀 Server running at ${address}`);
 });
+
 
 
 
