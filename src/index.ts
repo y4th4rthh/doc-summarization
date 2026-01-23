@@ -8,7 +8,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { Groq } from 'groq-sdk';
 import { parse } from 'csv-parse/sync';
-import pdfParse from 'pdf-parse';
+import pdfParse from "pdf-parse/lib/pdf-parse.js";
 import * as XLSX from 'xlsx';
 import mammoth from 'mammoth'
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -427,6 +427,7 @@ fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
     if (err) throw err;
     fastify.log.info(`🚀 Server running at ${address}`);
 });
+
 
 
 
