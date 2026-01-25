@@ -24,9 +24,9 @@ await fastify.register(cors, {
 });
 
 fastify.register(multipart, {
-  limits: {
-    fileSize: 50 * 1024 * 1024,
-  }
+    limits: {
+        fileSize: 50 * 1024 * 1024,
+    }
 });
 
 const __filename = fileURLToPath(import.meta.url);
@@ -41,41 +41,51 @@ const chatsCollection = db.collection('chats');
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 const runGeminiChat = async (sysPrompt: string, prompt: string) => {
-    const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
-        systemInstruction: sysPrompt,
-        generationConfig: {
-            temperature: 0.9,
-            maxOutputTokens: 2000
-        }
-    });
+    try {
+        const model = genAI.getGenerativeModel({
+            model: "gemini-2.5-flash",
+            systemInstruction: sysPrompt,
+            generationConfig: {
+                temperature: 0.9,
+                maxOutputTokens: 2000
+            }
+        });
 
-    // Gemini only takes user input as plain string (no "messages" like OpenAI or Groq)
-    const result = await model.generateContent(prompt);
-    return result.response.text();
+        // Gemini only takes user input as plain string (no "messages" like OpenAI or Groq)
+        const result = await model.generateContent(prompt);
+        return result.response.text();
+    }
+    catch (err: any) {
+        return "Your daily quota has expired. Please switch to another model or try later :(";
+    }
 };
 
 const runGeminiImg = async (sysPrompt: string, prompt: string, fileObj?: any) => {
-     //gemini-2.5-pro
-    const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
-        systemInstruction: sysPrompt,
-        generationConfig: {
-            temperature: 0.9,
-            maxOutputTokens: 2000
-        }
-    });
-
-    const parts: any[] = [prompt];
-
-    if (fileObj) {
-        parts.push({
-            inlineData: fileObj
+    try {
+        //gemini-2.5-pro
+        const model = genAI.getGenerativeModel({
+            model: "gemini-2.5-flash",
+            systemInstruction: sysPrompt,
+            generationConfig: {
+                temperature: 0.9,
+                maxOutputTokens: 2000
+            }
         });
-    }
 
-    const result = await model.generateContent(parts);
-    return result.response.text();
+        const parts: any[] = [prompt];
+
+        if (fileObj) {
+            parts.push({
+                inlineData: fileObj
+            });
+        }
+
+        const result = await model.generateContent(parts);
+        return result.response.text();
+    }
+    catch (err: any) {
+        return "Your daily quota has expired. Please switch to another model or try later :(";
+    }
 };
 
 
@@ -417,7 +427,7 @@ fastify.post('/img-chat', async function (req, reply) {
 });
 
 fastify.get('/ping', async (request, reply) => {
-  return { status: 'ok' }
+    return { status: 'ok' }
 })
 
 
@@ -427,15 +437,3 @@ fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
     if (err) throw err;
     fastify.log.info(`🚀 Server running at ${address}`);
 });
-
-
-
-
-
-
-
-
-
-
-
-
