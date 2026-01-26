@@ -224,7 +224,7 @@ fastify.post('/doc-chat', async function (req, reply) {
     console.log("AI RES", aiResponse);
 
 
-    if (!incognito) {
+    if (!incognito && aiResponse != "Your daily quota has expired. Please switch to another model or try later :(") {
         await chatsCollection.insertOne({
             session_id: sessionId || `${Date.now()}`,
             timestamp: new Date(),
@@ -406,7 +406,7 @@ fastify.post('/img-chat', async function (req, reply) {
     console.log("AI RES", aiResponse);
 
 
-    if (!incognito) {
+    if (!incognito && aiResponse != "Your daily quota has expired. Please switch to another model or try later :(") {
         await chatsCollection.insertOne({
             session_id: sessionId || `${Date.now()}`,
             timestamp: new Date(),
@@ -437,3 +437,4 @@ fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
     if (err) throw err;
     fastify.log.info(`🚀 Server running at ${address}`);
 });
+
