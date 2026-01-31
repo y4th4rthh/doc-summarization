@@ -205,7 +205,19 @@ fastify.post('/doc-chat', async function (req, reply) {
         ? `User query: ${text}`
         : text;
 
-    const sysPrompt = `You are an assistant who answers based on uploaded documents.`;
+    const sysPrompt = `You are an assistant who answers based on uploaded documents.
+    Do NOT use fenced code blocks for very small code snippets.
+
+Use normal texts for:
+- Single operators (++, --, +, -, *, etc.)
+- Short expressions (i++, ++i, a+b, x = 5)
+- One-line examples without logic
+
+Only use triple-backtick code blocks for:
+- Multi-line code
+- Functions, loops, or full examples
+- Large or structured code that benefits from block formatting
+    `;
 
     // const chatCompletion = await groqClient.chat.completions.create({
     //     messages: [
@@ -437,5 +449,6 @@ fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
     if (err) throw err;
     fastify.log.info(`🚀 Server running at ${address}`);
 });
+
 
 
