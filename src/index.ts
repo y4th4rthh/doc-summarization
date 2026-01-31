@@ -228,7 +228,7 @@ fastify.post('/doc-chat', async function (req, reply) {
         await chatsCollection.insertOne({
             session_id: sessionId || `${Date.now()}`,
             timestamp: new Date(),
-            user_text: usrText,
+            user_text: text,
             user_id,
             file_name: fileName,
             model,
@@ -237,7 +237,7 @@ fastify.post('/doc-chat', async function (req, reply) {
     }
 
     return reply.send({
-        userText: usrText,
+        userText: text,
         aiText: aiResponse,
         fileName: fileName,
         session_id: sessionId || `${Date.now()}`
@@ -410,7 +410,7 @@ fastify.post('/img-chat', async function (req, reply) {
         await chatsCollection.insertOne({
             session_id: sessionId || `${Date.now()}`,
             timestamp: new Date(),
-            user_text: usrText,
+            user_text: text,
             user_id,
             file_name: fileName,
             model,
@@ -419,7 +419,7 @@ fastify.post('/img-chat', async function (req, reply) {
     }
 
     return reply.send({
-        userText: usrText,
+        userText: text,
         aiText: aiResponse,
         fileName: fileName,
         session_id: sessionId || `${Date.now()}`
@@ -437,4 +437,5 @@ fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
     if (err) throw err;
     fastify.log.info(`🚀 Server running at ${address}`);
 });
+
 
