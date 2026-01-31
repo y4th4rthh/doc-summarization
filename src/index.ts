@@ -202,7 +202,7 @@ fastify.post('/doc-chat', async function (req, reply) {
         : text;
 
     const usrText = fileName
-        ? `User query: ${text}`
+        ? `${text}`
         : text;
 
     const sysPrompt = `You are an assistant who answers based on uploaded documents.
@@ -240,7 +240,7 @@ Only use triple-backtick code blocks for:
         await chatsCollection.insertOne({
             session_id: sessionId || `${Date.now()}`,
             timestamp: new Date(),
-            user_text: text,
+            user_text: usrText,
             user_id,
             file_name: fileName,
             model,
@@ -249,7 +249,7 @@ Only use triple-backtick code blocks for:
     }
 
     return reply.send({
-        userText: text,
+        userText: usrText,
         aiText: aiResponse,
         fileName: fileName,
         session_id: sessionId || `${Date.now()}`
@@ -391,7 +391,7 @@ fastify.post('/img-chat', async function (req, reply) {
             : text;
 
         usrText = fileName
-            ? `User query: ${text}`
+            ? `${text}`
             : text;
 
         const sysPrompt = `You are an assistant who summarizes the content generated.`;
@@ -405,10 +405,22 @@ fastify.post('/img-chat', async function (req, reply) {
             : text;
 
         usrText = fileName
-            ? `User query: ${text}`
+            ? `${text}`
             : text;
 
-        const sysPrompt = `You are an assistant who answers based on uploaded documents.`;
+        const sysPrompt = `You are an assistant who answers based on uploaded documents.
+        Do NOT use fenced code blocks for very small code snippets.
+
+Use normal texts for:
+- Single operators (++, --, +, -, *, etc.)
+- Short expressions (i++, ++i, a+b, x = 5)
+- One-line examples without logic
+
+Only use triple-backtick code blocks for:
+- Multi-line code
+- Functions, loops, or full examples
+- Large or structured code that benefits from block formatting
+        `;
 
 
         aiResponse = await runGeminiChat(sysPrompt, prompt);
@@ -422,7 +434,7 @@ fastify.post('/img-chat', async function (req, reply) {
         await chatsCollection.insertOne({
             session_id: sessionId || `${Date.now()}`,
             timestamp: new Date(),
-            user_text: text,
+            user_text: usrText,
             user_id,
             file_name: fileName,
             model,
@@ -431,7 +443,7 @@ fastify.post('/img-chat', async function (req, reply) {
     }
 
     return reply.send({
-        userText: text,
+        userText: usrText,
         aiText: aiResponse,
         fileName: fileName,
         session_id: sessionId || `${Date.now()}`
@@ -449,6 +461,7 @@ fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
     if (err) throw err;
     fastify.log.info(`🚀 Server running at ${address}`);
 });
+
 
 
 
