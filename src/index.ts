@@ -202,7 +202,7 @@ fastify.post('/doc-chat', async function (req, reply) {
         : text;
 
     const usrText = fileName
-        ? `User query : ${text}`
+        ? `User query: ${text}`
         : text;
 
     const sysPrompt = `You are an assistant who answers based on uploaded documents.
@@ -407,7 +407,7 @@ fastify.post('/img-chat', async function (req, reply) {
             : text;
 
         usrText = fileName
-            ? `User query : ${text}`
+            ? `User query: ${text}`
             : text;
 
         const sysPrompt = `You are an assistant who summarizes the content generated.`;
