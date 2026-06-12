@@ -64,6 +64,37 @@ const runGeminiChat = async (sysPrompt: string, prompt: string): Promise<string>
     }
 };
 
+const runGeminiDoc = async (sysPrompt: string, prompt: string, fileObj?: { mimeType: string; data: string }) => {
+    try {
+        const contentsArray: any[] = [prompt];
+
+        if (fileObj) {
+            contentsArray.push({
+                inlineData: {
+                    mimeType: fileObj.mimeType, // Will be 'application/pdf'
+                    data: fileObj.data         // Base64 encoded string of the PDF
+                }
+            });
+        }
+
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: contentsArray,
+            config: {
+                systemInstruction: sysPrompt,
+                temperature: 0.4, // Lower temperature is usually better for factual doc reading
+                maxOutputTokens: 2000
+            }
+        });
+
+        return response.text || "No response text generated.";
+    }
+    catch (err: any) {
+        console.error("Gemini Document Error:", err);
+        return "Your daily quota has expired. Please switch to another model or try later :(";
+    }
+};
+
 const runGeminiImg = async (sysPrompt: string, prompt: string, fileObj?: { mimeType: string; data: string }) => {
     try {
         // Initialize an array for your parts/contents
@@ -159,8 +190,23 @@ fastify.post('/doc-chat', async function (req, reply) {
 
         if (file.filename.endsWith('.pdf')) {
             const buffer = await fs.readFile(tempPath);
-            const data = await pdfParse(buffer);
-            fileText = data.text;
+const base64Pdf = buffer.toString("base64");
+
+const fileData = {
+    mimeType: "application/pdf", // Tell Gemini it's a PDF document
+    data: base64Pdf
+};
+
+console.log("Preparing to call Gemini with PDF...");
+
+// 🟢 CALL GEMINI FOR DOCUMENTS HERE
+const geminiResponse = await runGeminiDoc(
+    "You are an expert document analyzer and reader. Respond accurately. Extract the core information, summaries, tables, or structural data requested, while ignoring formatting clutter. Do not hallucinate or invent figures.", // Document-focused sysPrompt
+    "Please provide a bulleted summary of this document.", // user text prompt
+    fileData // base64 pdf object
+);
+            
+             fileText = geminiResponse;
         }
         else if (file.filename.endsWith('.png') || file.filename.endsWith('.jpg') || file.filename.endsWith('.jpeg')) {
             const tesseract = await import('tesseract.js');
@@ -340,7 +386,24 @@ fastify.post('/img-chat', async function (req, reply) {
         await fs.writeFile(tempPath, await file.toBuffer());
 
         if (file.filename.endsWith('.pdf')) {
-            fileText = "SORRY PDFs ARE CURRENTLY UNSUPPORTED FORMAT";
+            const buffer = await fs.readFile(tempPath);
+const base64Pdf = buffer.toString("base64");
+
+const fileData = {
+    mimeType: "application/pdf", // Tell Gemini it's a PDF document
+    data: base64Pdf
+};
+
+console.log("Preparing to call Gemini with PDF...");
+
+// 🟢 CALL GEMINI FOR DOCUMENTS HERE
+const geminiResponse = await runGeminiDoc(
+    "You are an expert document analyzer and reader. Respond accurately. Extract the core information, summaries, tables, or structural data requested, while ignoring formatting clutter. Do not hallucinate or invent figures.", // Document-focused sysPrompt
+    "Please provide a bulleted summary of this document.", // user text prompt
+    fileData // base64 pdf object
+);
+
+             fileText = geminiResponse;
         }
         else if (
             file.filename.endsWith('.png') ||
@@ -413,6 +476,20 @@ fastify.post('/img-chat', async function (req, reply) {
     if (file.filename.endsWith('.png') || file.filename.endsWith('.jpg') || file.filename.endsWith('.jpeg')) {
         const prompt = fileText
             ? `The user uploaded the following image content:\n\n${fileText}\n\nUser query: ${text}`
+            : text;
+
+        usrText = fileName
+            ? `User query: ${text}`
+            : text;
+
+        const sysPrompt = `You are an assistant who summarizes the content generated.`;
+
+
+        aiResponse = await runGeminiChat(sysPrompt, prompt);
+    }
+    else if(file.filename.endsWith('.pdf')){
+         const prompt = fileText
+            ? `The user uploaded the following pdf content:\n\n${fileText}\n\nUser query: ${text}`
             : text;
 
         usrText = fileName
