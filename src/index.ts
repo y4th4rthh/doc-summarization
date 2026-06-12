@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs-extra';
 import path from 'path';
 import { Groq } from 'groq-sdk';
+import { GoogleGenAI } from "@google/genai";
 import { parse } from 'csv-parse/sync';
 import pdfParse from "pdf-parse/lib/pdf-parse.js";
 import * as XLSX from 'xlsx';
@@ -38,56 +39,64 @@ const groqClient = new Groq({ apiKey: process.env.GROQ_API_KEY || '' });
 await mongoClient.connect();
 const db = mongoClient.db('neuraai');
 const chatsCollection = db.collection('chats');
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const ai = new GoogleGenAI({});
+// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
-const runGeminiChat = async (sysPrompt: string, prompt: string) => {
+const runGeminiChat = async (sysPrompt: string, prompt: string): Promise<string> => {
     try {
-        const model = genAI.getGenerativeModel({
+        // The stateless generateContent call replaces getGenerativeModel
+        const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
-            systemInstruction: sysPrompt,
-            generationConfig: {
+            contents: prompt,
+            config: {
+                systemInstruction: sysPrompt,
                 temperature: 0.9,
                 maxOutputTokens: 2000
             }
         });
 
-        // Gemini only takes user input as plain string (no "messages" like OpenAI or Groq)
-        const result = await model.generateContent(prompt);
-        return result.response.text();
+        // The response text is a simple property now, not a function call
+        return response.text || "No response text generated.";
     }
     catch (err: any) {
+        console.error("Gemini API Error:", err); // Log the actual error so you can debug!
         return "Your daily quota has expired. Please switch to another model or try later :(";
     }
 };
 
-const runGeminiImg = async (sysPrompt: string, prompt: string, fileObj?: any) => {
+const runGeminiImg = async (sysPrompt: string, prompt: string, fileObj?: { mimeType: string; data: string }) => {
     try {
-        //gemini-2.5-pro
-        const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash",
-            systemInstruction: sysPrompt,
-            generationConfig: {
-                temperature: 0.9,
-                maxOutputTokens: 2000
-            }
-        });
-
-        const parts: any[] = [prompt];
+        // Initialize an array for your parts/contents
+        const contentsArray: any[] = [prompt];
 
         if (fileObj) {
-            parts.push({
-                inlineData: fileObj
+            // The structure requires the inlineData property to contain mimeType and data directly
+            contentsArray.push({
+                inlineData: {
+                    mimeType: fileObj.mimeType,
+                    data: fileObj.data // Expects base64 encoded string data
+                }
             });
         }
 
-        const result = await model.generateContent(parts);
-        return result.response.text();
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            // The single array containing text prompts and images goes here
+            contents: contentsArray, 
+            config: {
+                systemInstruction: sysPrompt,
+                temperature: 0.9,
+                maxOutputTokens: 2000
+            }
+        });
+
+        return response.text || "No response text generated.";
     }
     catch (err: any) {
-        return "Your daily quota has expired. Please switch to another model or try later :(";
+        console.error("Gemini Multimodal Error:", err); // Crucial for real debugging!
+        return "our daily quota has expired. Please switch to another model or try later :(";
     }
 };
-
 
 // Endpoint
 fastify.post('/doc-chat', async function (req, reply) {
