@@ -46,7 +46,7 @@ const runGeminiChat = async (sysPrompt: string, prompt: string): Promise<string>
     try {
         // The stateless generateContent call replaces getGenerativeModel
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3.5-flash",
             contents: prompt,
             config: {
                 systemInstruction: sysPrompt,
@@ -78,7 +78,7 @@ const runGeminiDoc = async (sysPrompt: string, prompt: string, fileObj?: { mimeT
         }
 
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3.5-flash",
             contents: contentsArray,
             config: {
                 systemInstruction: sysPrompt,
@@ -111,7 +111,7 @@ const runGeminiImg = async (sysPrompt: string, prompt: string, fileObj?: { mimeT
         }
 
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3.5-flash",
             // The single array containing text prompts and images goes here
             contents: contentsArray, 
             config: {
